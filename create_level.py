@@ -6,8 +6,8 @@ from pygame import Rect
 class Wall:
     def __init__(self, image, coord):
         self.image = image
-        self.rect = Rect((coord[0], coord[1] + int(self.image.get_size()[1] - 30), self.image.get_size()[0], 30))
-        self.coord = coord
+        self.rect = Rect((coord[0], coord[1], self.image.get_size()[0], 30))
+        self.coord = coord[0], coord[1] - int(self.image.get_size()[1] - 30)
         self.types = ['object', 'Image']
 
     def is_type(self, arg):
