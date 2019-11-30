@@ -14,10 +14,6 @@ class WeaponObj(Weapon):
         for frame in shoot_image:
             self.shoot_frames.append(Image('sprite/Weapon_sprites/' + frame))
 
-    def draw(self):
-        print(type(self.get_image()))
-        self.screen.blit(self.get_image(), self.get_coord())
-
     def shoot(self):
         if self.frame < len(self.shoot_frames) - 2:
             if self.event == 8:
@@ -30,8 +26,3 @@ class WeaponObj(Weapon):
             self.image = self.shoot_frames[self.frame].get_image()
             self.frame = 0
             self.event = 0
-            if self.coord[0] - self.aim.get_coord()[0] >= 0 and \
-                self.coord[1] - self.aim.get_coord()[1] >= 0:
-                self.aim.damage(random.choice(range(self.range_damage[0], self.range_damage[1])))
-        print(self.frame)
-        self.draw()

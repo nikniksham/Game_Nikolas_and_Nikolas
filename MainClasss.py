@@ -2,6 +2,7 @@ import pygame
 import random
 from pygame.sprite import Sprite, collide_rect
 from pygame import image
+import math
 
 # в этом файле реализуется логика взаимодействия объектов между собой
 # убедительна просьба прочитать инструкцию перед написанием классов чтобы всем было удобнее
@@ -191,7 +192,7 @@ class Group(Object):
         # пример объект сам удаляется из группы передав self
         # проверяем находится ли объект в группе
         if object in self.objects:
-            # если объект в группе то удаляем его из группы
+            # если get_coord() объект в группе то удаляем его из группы
             self.objects.remove(object)
             # и удаляем из списка групп в которых он состаит эту группу
             object.remove_group(self)
@@ -384,7 +385,7 @@ class Camera(MainObject):
         pygame.display.set_caption(f'FPS: {self.clock.get_fps()}, Item on scene: {count}, {len(level.get_object())}, Coord: {level.get_main_hero().get_rect()}')
         # обнавляем экран
         # ограничиваем количество кадров в секунду до 120
-        self.clock.tick(120)
+        self.clock.tick(60)
 
 
 class Item(Object):
@@ -513,12 +514,32 @@ class Bullet(Item):
     def __init__(self, image, coord, name, max_count, type_bullet, size=None, info=''):
         super().__init__(image, coord, name, max_count, size, info)
         # добавляем тип: Bullet
+        self.list_bullet = []
         self.add_type('Bullet')
+        self.bullets = False
         self.type_bullet = type_bullet
 
     def get_type_bullet(self):
         # возвращает тип снаряда
         return self.type_bullet
+
+    def spawn_bullet(self, x_vel, y_vel, bullet, x, y):
+        self.bullets = True
+        self.list_bullet.append([[x_vel, y_vel], [x, y], bullet])
+
+    def collide_bullet(self, bullet_list, list_heal_point_obj):
+        for bullet in bullet_list:
+            for object in list_heal_point_obj:
+                pass
+
+    def draw_bullet(self, screen):
+        for bullet in self.list_bullet:
+            coord_bullet = bullet[1]
+            motion_bullet = bullet[0]
+            image_bullet = bullet[2].get_image()
+            coord_bullet[0] += motion_bullet[0]
+            coord_bullet[1] += motion_bullet[1]
+            screen.blit(image_bullet, coord_bullet)
 
 
 class Weapon(Bullet):
@@ -588,8 +609,16 @@ class Weapon(Bullet):
             # наносим полный урон
             enemy.damage(int(damage))
 
+    def flight_path(self, mouse_pos, hero_pos):
+        x, y = hero_pos
+        m_x, m_y = mouse_pos
+        rad = math.atan2(m_y - y, m_x - x)
+        sin = math.sin(rad)
+        cos = math.cos(rad)
+        return sin, cos
+
     def get_accuracy(self):
-        # возвращает точность оружия (десятичное число, самая лучшая точность - 1.0)
+        # возвращает точность оружия (десятичное число, самая лучшая точность ---> 1.0)
         return self.accuracy
 
 

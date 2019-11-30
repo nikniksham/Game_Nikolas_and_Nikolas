@@ -13,7 +13,7 @@ class Player(Person, Sprite):
         # sites moving lists
 
         # downloading sprites
-
+        self.weapon = None
         # rect and move
         self.rect = Rect((0, 20, 20, 30))
         print(self.rect)
