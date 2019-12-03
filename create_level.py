@@ -4,11 +4,41 @@ from pygame import Rect
 
 
 class Wall:
-    def __init__(self, image, coord):
-        self.image = image
-        self.rect = Rect((coord[0], coord[1], self.image.get_size()[0], 30))
+    def __init__(self, info, coord):
+        print(type(info) == tuple, info)
+        if type(info) == tuple:
+            self.image = info[0].get_image()
+            if info[1] is None:
+                self.rect = Rect((coord[0], coord[1], self.image.get_size()[0], 30))
+            else:
+                self.rect = Rect((coord[0] + self.image.get_size()[0] // 2 - info[1], coord[1], info[1] * 2, 30))
+        else:
+            self.image = info
+            self.rect = Rect((coord[0], coord[1], self.image.get_size()[0], 30))
+        print(self.image, 'gggg')
+
         self.coord = coord[0], coord[1] - int(self.image.get_size()[1] - 30)
         self.types = ['object', 'Image']
+        self.layer = 0
+        self.is_back_ground = False
+
+    def get_rect(self):
+        return self.rect
+
+    def set_bg(self, val: bool):
+        self.is_back_ground = bool(val)
+
+    def get_is_bg(self):
+        return self.is_back_ground
+
+    def set_layer(self, layer):
+        self.layer = layer
+
+    def get_layer(self):
+        return self.layer
+
+    def get_mask(self):
+        return Wonderful(Rect(self.coord, self.image.get_size()))
 
     def is_type(self, arg):
         return arg in self.types
@@ -67,7 +97,8 @@ def make_level(slow_key, slow, big_chunk_count=((0, 0), (1, 1))):
                         for _ in range(16):
                             if compresion >= random():
                                 count += 1
-                                wall = Wall(choice(blocks).get_image(), (chunk_x, chunk_y))
+                                print(blocks, 'dd')
+                                wall = Wall(choice(blocks), (chunk_x, chunk_y))
                             wall_bg = Wall(choice(bg_blocks).get_image(), (chunk_x, chunk_y))
                             if wall:
                                 add_count += 1

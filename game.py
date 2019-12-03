@@ -18,14 +18,14 @@ size = 30
 # берйм ваше разрешение вашего экрана
 # size_screen = (GetSystemMetrics(0), GetSystemMetrics(1))
 
-size_screen = (1920, 1080)
+# size_screen = (1920, 1080)
 
 # 1 чанк 16 на 16 картинок
 # 1 чанк 480 на 480 пикселей
 # 1 картинка 30 на 30 пикселей
 # размер каты в чанках
 chunk_count = ((0, 0), (1, 1))
-# size_screen = (1080, 720)
+size_screen = (1280, 720)
 
 # camera
 camera = Camera(size_screen, (0, 0, 0),
@@ -37,15 +37,14 @@ camera = Camera(size_screen, (0, 0, 0),
 # словарь картинок
 slow = {'bn': [Image('sprite/blocks_sprites/back_1.bmp'), Image('sprite/blocks_sprites/block_3.bmp'),
                Image('sprite/blocks_sprites/back_2.bmp'), Image('sprite/blocks_sprites/back_4.bmp')],
-        'tn': [Image('sprite/blocks_sprites/tree.bmp'), Image('sprite/blocks_sprites/tree_1.bmp'),
-               Image('sprite/blocks_sprites/stone_2.bmp')],
-        'cn': 0.1,
+        'tn': [(Image('sprite/blocks_sprites/tree.bmp'), 13), (Image('sprite/blocks_sprites/tree_1.bmp'), 7),
+               (Image('sprite/blocks_sprites/stone_2.bmp'), None)],
+        'cn': 0.01,
         'bs': [Image('sprite/blocks_sprites/sand_1.bmp')],
-        'ts': [Image('sprite/blocks_sprites/stone_1.bmp')],
+        'ts': [(Image('sprite/blocks_sprites/stone_1.bmp'), None), (Image('sprite/blocks_sprites/Cactus_1.bmp'), None)],
         'cs': 0.01}
 
 if chunk_count == ((0,), (1, 1)):
-    print(f'2 core creating')
     chunk_count_1 = (chunk_count[0], (chunk_count[1][0], chunk_count[1][1] // 2))
     chunk_count_2 = ((chunk_count[1][0], chunk_count[1][1] // 2), chunk_count[1])
     print(chunk_count_1, chunk_count_2, 'gff')
@@ -133,9 +132,11 @@ scene.add_object(NPS)
 heal_point = Image('sprite/User_Interface/heal_point.bmp')
 Desert_eagle = WeaponObj('sprite/Weapon_sprites/Desert Eagle.bmp', (360, 360), 'DesertEagle', 1, 'simple', 'simple',
                          120, (10, 100), 200, 1, None, shoot_image, screen=screen, aim=hero)
+scene.add_object(Desert_eagle)
 # цикл работает
 run = True
 coord = [(int(size_screen[0] - 500), int(size_screen[1] - 160)), (int(size_screen[0] - 790), int(size_screen[1] - 160))]
+hero.weapon = Desert_eagle
 
 
 def print_text(message, x, y, font_style='arial.ttf', font_size=30, font_color=(0, 0, 0)):
@@ -185,6 +186,14 @@ while run:
                 if event.key == 311:
                     f = True
                 camera.create()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                mouse = pygame.mouse.get_pos()
+                coord_person = camera.object_coord(hero.get_coord())
+                sin, cos = hero.weapon.flight_path(mouse, coord_person)
+                x_vel, y_vel = 50 * sin, 50 * cos
+                hero.weapon.spawn_bullet(y_vel, x_vel, Image('sprite/bullets/standart bullet.bmp'),
+                                         coord_person[0], coord_person[1])
     # обнавляем главного героя (двигаем и анимируем)
     camera.draw(scene)
     hero.update(left, right, up, down, walls_group, enemy_group, shift)
@@ -194,9 +203,10 @@ while run:
         hero.die('sprite/person_sprites/', [die_frames])
     if hero.get_die():
         resurrection.draw(hero.resurrection, screen)
+    if hero.weapon is not None:
+        if hero.weapon.bullets:
+            hero.weapon.draw_bullet(screen)
     # NPS.update(hero, walls_group)
     print_text(str(int(camera.clock.get_fps())), size_screen[0] - 250, 120, font_color=(255, 255, 0))
     # отрисовываем сцену
-    # Desert_eagle.shoot()
-    # Desert_eagle.draw(screen)
     pygame.display.flip()

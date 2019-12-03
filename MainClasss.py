@@ -1,7 +1,8 @@
 import pygame
 import random
 from pygame.sprite import Sprite, collide_rect
-from pygame import image
+from pygame import image, Rect
+import math
 
 # в этом файле реализуется логика взаимодействия объектов между собой
 # убедительна просьба прочитать инструкцию перед написанием классов чтобы всем было удобнее
@@ -44,6 +45,14 @@ def get_gipotinuza(coord_1, coord_2):
 load_data()
 
 
+class Wonderful:
+    def __init__(self, rect):
+        self.rect = rect
+
+    def get_rect(self):
+        return self.rect
+
+
 class MainObject:
     def __init__(self):
         self.types = ['MainObject']
@@ -74,6 +83,23 @@ class Image(MainObject, Sprite):
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = coord
         self.image.set_colorkey(transpote_color)
+        self.layer = 0
+        self.is_back_ground = False
+
+    def set_bg(self, val: bool):
+        self.is_back_ground = bool(val)
+
+    def get_is_bg(self):
+        return self.is_back_ground
+
+    def set_layer(self, layer):
+        self.layer = layer
+
+    def get_layer(self):
+        return self.layer
+
+    def get_mask(self):
+        return Wonderful(Rect(self.coord, self.image.get_size()))
 
     def set_coord(self, coord):
         self.coord = coord
@@ -191,7 +217,7 @@ class Group(Object):
         # пример объект сам удаляется из группы передав self
         # проверяем находится ли объект в группе
         if object in self.objects:
-            # если объект в группе то удаляем его из группы
+            # если get_coord() объект в группе то удаляем его из группы
             self.objects.remove(object)
             # и удаляем из списка групп в которых он состаит эту группу
             object.remove_group(self)
@@ -358,6 +384,7 @@ class Camera(MainObject):
         self.get_screen_coord(level.get_main_hero().get_rect())
         # количетсво элементов
         count = 0
+        layer = {}
         # выводим объекты из чанков
         for object in level.get_main_chunks(self):
             if str(type(object)) == '<class \'Chunk.ChunkImage\'>':
@@ -369,12 +396,29 @@ class Camera(MainObject):
         for object in level.get_object():
             # количетсво объектов на 1 обльше
             # и выводим из на дисплей отнасительно главного героя
-            self.screen.blit(object.get_image(), self.object_coord(object.get_coord()))
+            if object.get_is_bg():
+                self.screen.blit(object.get_image(), self.object_coord(object.get_coord()))
+            else:
+                if object.get_layer() in layer:
+                    layer[object.get_layer()].append(object)
+                else:
+                    layer[object.get_layer()] = [object]
         for object in level.get_main_chunks(self):
             if str(type(object)) != '<class \'Chunk.ChunkImage\'>':
                 # количетсво объектов на 1 обльше
                 count += 1
                 # выводим на экран объект
+                if object.get_is_bg():
+                    self.screen.blit(object.get_image(), self.object_coord(object.get_coord()))
+                else:
+                    if object.get_layer() in layer:
+                        layer[object.get_layer()].append(object)
+                    else:
+                        layer[object.get_layer()] = [object]
+        layers = list(layer.keys())
+        layers.sort()
+        for key in layers:
+            for object in layer[key]:
                 self.screen.blit(object.get_image(), self.object_coord(object.get_coord()))
         # обнавляем экран
         # poop = draw.circle(self.screen, (255, 0, 0), (self.size_screen[0] // 2, self.size_screen[1] // 2), 15)
@@ -384,7 +428,7 @@ class Camera(MainObject):
         pygame.display.set_caption(f'FPS: {self.clock.get_fps()}, Item on scene: {count}, {len(level.get_object())}, Coord: {level.get_main_hero().get_rect()}')
         # обнавляем экран
         # ограничиваем количество кадров в секунду до 120
-        self.clock.tick(120)
+        self.clock.tick(60)
 
 
 class Item(Object):
@@ -513,12 +557,32 @@ class Bullet(Item):
     def __init__(self, image, coord, name, max_count, type_bullet, size=None, info=''):
         super().__init__(image, coord, name, max_count, size, info)
         # добавляем тип: Bullet
+        self.list_bullet = []
         self.add_type('Bullet')
+        self.bullets = False
         self.type_bullet = type_bullet
 
     def get_type_bullet(self):
         # возвращает тип снаряда
         return self.type_bullet
+
+    def spawn_bullet(self, x_vel, y_vel, bullet, x, y):
+        self.bullets = True
+        self.list_bullet.append([[x_vel, y_vel], [x, y], bullet])
+
+    def collide_bullet(self, bullet_list, list_heal_point_obj):
+        for bullet in bullet_list:
+            for object in list_heal_point_obj:
+                pass
+
+    def draw_bullet(self, screen):
+        for bullet in self.list_bullet:
+            coord_bullet = bullet[1]
+            motion_bullet = bullet[0]
+            image_bullet = bullet[2].get_image()
+            coord_bullet[0] += motion_bullet[0]
+            coord_bullet[1] += motion_bullet[1]
+            screen.blit(image_bullet, coord_bullet)
 
 
 class Weapon(Bullet):
@@ -588,8 +652,16 @@ class Weapon(Bullet):
             # наносим полный урон
             enemy.damage(int(damage))
 
+    def flight_path(self, mouse_pos, hero_pos):
+        x, y = hero_pos
+        m_x, m_y = mouse_pos
+        rad = math.atan2(m_y - y, m_x - x)
+        sin = math.sin(rad)
+        cos = math.cos(rad)
+        return sin, cos
+
     def get_accuracy(self):
-        # возвращает точность оружия (десятичное число, самая лучшая точность - 1.0)
+        # возвращает точность оружия (десятичное число, самая лучшая точность ---> 1.0)
         return self.accuracy
 
 
@@ -730,6 +802,14 @@ class MovingObject(HealPointObject):
                     self.rect.top = pl.rect.bottom
                     # столкновение сверху
                     self.collision_y_site = 1
+            rect = self.rect
+            self.rect = self.get_rect()
+            if collide_rect(self, pl.get_mask()):
+                if self.rect.bottom < pl.get_mask().rect.bottom:
+                    self.set_layer(pl.get_layer() - 1)
+                else:
+                    pl.set_layer(self.get_layer() - 1)
+            self.rect = rect
 
 
 class AnimationObject(MovingObject):
@@ -904,6 +984,8 @@ class EnemyBlock(Object):
         self.add_type('enemy_spike')
         self.negative_effect = negative_effect
         self.coord = coord
+        self.set_bg(True)
+
 
     def attack(self, enemy):
         enemy.damage(self.damag)

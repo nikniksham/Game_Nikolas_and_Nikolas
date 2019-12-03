@@ -1,5 +1,5 @@
 from MainClasss import *
-from pygame import Surface
+from pygame import Surface, Rect
 
 
 class ChunkImage(Surface, Sprite):
@@ -7,6 +7,23 @@ class ChunkImage(Surface, Sprite):
         Sprite.__init__(self)
         self.image = surf
         self.coord = coord
+        self.layer = 0
+        self.is_back_ground = False
+
+    def set_bg(self, val: bool):
+        self.is_back_ground = bool(val)
+
+    def get_is_bg(self):
+        return self.is_back_ground
+
+    def set_layer(self, layer):
+        self.layer = layer
+
+    def get_layer(self):
+        return self.layer
+
+    def get_mask(self):
+        return Wonderful(Rect(self.coord, self.image.get_size()))
 
     def get_image(self):
         return self.image
