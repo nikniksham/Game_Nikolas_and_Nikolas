@@ -25,7 +25,7 @@ size = 30
 # 1 картинка 30 на 30 пикселей
 # размер каты в чанках
 chunk_count = ((0, 0), (1, 1))
-size_screen = (1280, 720)
+size_screen = (1920, 1080)
 
 # camera
 camera = Camera(size_screen, (0, 0, 0),
