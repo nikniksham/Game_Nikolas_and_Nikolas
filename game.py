@@ -25,7 +25,7 @@ size = 30
 # 1 картинка 30 на 30 пикселей
 # размер каты в чанках
 chunk_count = ((0, 0), (1, 1))
-size_screen = (1920, 1080)
+size_screen = (1280, 720)
 
 # camera
 camera = Camera(size_screen, (0, 0, 0),
@@ -206,7 +206,7 @@ while run:
     if hero.weapon is not None:
         if hero.weapon.bullets:
             hero.weapon.draw_bullet(screen)
-    # NPS.update(hero, walls_group)
+    NPS.update(hero, walls_group)
     print_text(str(int(camera.clock.get_fps())), size_screen[0] - 250, 120, font_color=(255, 255, 0))
     # отрисовываем сцену
     pygame.display.flip()

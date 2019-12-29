@@ -765,51 +765,51 @@ class MovingObject(HealPointObject):
         return self.armor
 
     def collide(self, x_vel, y_vel, platforms):
-        # проверка столкновения
-        # если скорость по горизонту не равна нулю
-        if x_vel != 0:
-            # столкновений по оси икс нет
-            self.collision_x_site = 0
-        # если скорость по оси игрик не равна нулю
-        elif y_vel != 0:
-            # столкновений по оси игрик нет
-            self.collision_y_site = 0
-        # проходимся по списку стен с которыми можем столкнуться
-        for pl in platforms.get_object():
-            # если столкнулись
-            if collide_rect(self, pl):
-                # если скорость по оси икс больше 0
-                if x_vel > 0:
-                    # правая сторона равна левой строне объекта с которым мы столкнулись
-                    self.rect.right = pl.rect.left
-                    # столкновение справа
-                    self.collision_x_site = 2
-                # если скорость по оси икс меньше 0
-                elif x_vel < 0:
-                    # левая сторона объекта равна правой стороне объекта
-                    self.rect.left = pl.rect.right
-                    # столкновение слева
-                    self.collision_x_site = 1
-                # если скорость по оси игрик больше 0
-                elif y_vel > 0:
-                    # низ объекта равен верху объекта с которым чтолкнулись
-                    self.rect.bottom = pl.rect.top
-                    # столкновение снизу
-                    self.collision_y_site = 2
-                # если скорость по оси игрик меньше 0
-                elif y_vel < 0:
-                    # верх объекта равен инзу объекта с котрым столкнулись
-                    self.rect.top = pl.rect.bottom
-                    # столкновение сверху
-                    self.collision_y_site = 1
-            rect = self.rect
-            self.rect = self.get_rect()
-            if collide_rect(self, pl.get_mask()):
-                if self.rect.bottom < pl.get_mask().rect.bottom:
-                    self.set_layer(pl.get_layer() - 1)
-                else:
-                    pl.set_layer(self.get_layer() - 1)
-            self.rect = rect
+            # проверка столкновения
+            # если скорость по горизонту не равна нулю
+            if x_vel != 0:
+                # столкновений по оси икс нет
+                self.collision_x_site = 0
+            # если скорость по оси игрик не равна нулю
+            elif y_vel != 0:
+                # столкновений по оси игрик нет
+                self.collision_y_site = 0
+            # проходимся по списку стен с которыми можем столкнуться
+            for pl in platforms.get_object():
+                # если столкнулись
+                if collide_rect(self, pl):
+                    # если скорость по оси икс больше 0
+                    if x_vel > 0:
+                        # правая сторона равна левой строне объекта с которым мы столкнулись
+                        self.rect.right = pl.rect.left
+                        # столкновение справа
+                        self.collision_x_site = 2
+                    # если скорость по оси икс меньше 0
+                    elif x_vel < 0:
+                        # левая сторона объекта равна правой стороне объекта
+                        self.rect.left = pl.rect.right
+                        # столкновение слева
+                        self.collision_x_site = 1
+                    # если скорость по оси игрик больше 0
+                    elif y_vel > 0:
+                        # низ объекта равен верху объекта с которым чтолкнулись
+                        self.rect.bottom = pl.rect.top
+                        # столкновение снизу
+                        self.collision_y_site = 2
+                    # если скорость по оси игрик меньше 0
+                    elif y_vel < 0:
+                        # верх объекта равен инзу объекта с котрым столкнулись
+                        self.rect.top = pl.rect.bottom
+                        # столкновение сверху
+                        self.collision_y_site = 1
+                rect = self.rect
+                self.rect = self.get_rect()
+                if collide_rect(self, pl.get_mask()):
+                    if self.rect.bottom < pl.get_mask().rect.bottom:
+                        self.set_layer(pl.get_layer() - 1)
+                    else:
+                        pl.set_layer(self.get_layer() - 1)
+                self.rect = rect
 
 
 class AnimationObject(MovingObject):

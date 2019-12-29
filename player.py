@@ -15,7 +15,7 @@ class Player(Person, Sprite):
         # downloading sprites
 
         # rect and move
-        self.rect = Rect((0, 20, 20, 30))
+        self.rect = Rect((0, 20, 20, 10))
         print(self.rect)
         self.speed_boost = False
 
@@ -71,7 +71,7 @@ class Player(Person, Sprite):
         self.draw()
 
     def get_coord(self):
-        return self.rect.x, self.rect.y
+        return self.rect.x, self.rect.y - 20
 
     def next_frame(self):
         self.count_next_frame += 1
